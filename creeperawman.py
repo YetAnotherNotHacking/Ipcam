@@ -1,15 +1,22 @@
 # https://silverflag.net/ (c) 2025
-import cv2
-import threading
-import numpy as np
-import random
-import time
-import requests
-import urllib.parse
-import logging
-import os
-import psutil
-import pyautogui
+try:
+    import cv2
+    import threading
+    import numpy as np
+    import random
+    import time
+    import requests
+    import urllib.parse
+    import logging
+    import os
+    import psutil
+    import pyautogui
+    import platform
+    import subprocess
+    import ctypes
+except ImportError as e:
+    print("Did you run 'pip3 install -r requirements.txt? You are missing something.'")
+    print(f"Missing package {e}")
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -28,11 +35,34 @@ default_stream_params = {
 # Timing
 start_time = time.time()
 
-# The previous functions were not working correcty, later: update this to actually get the screen x and y
+def get_raw_screen_resolution():
+    system = platform.system()
+
+    if system == "Windows":
+        user32 = ctypes.windll.user32
+        user32.SetProcessDPIAware()
+        width = user32.GetSystemMetrics(0)
+        height = user32.GetSystemMetrics(1)
+        return width, height
+
+    elif system == "Darwin":
+        import Quartz
+        main_display = Quartz.CGDisplayBounds(Quartz.CGMainDisplayID())
+        width = int(main_display.size.width)
+        height = int(main_display.size.height)
+        return width, height
+
+    elif system == "Linux":
+        output = subprocess.check_output("xrandr | grep '*' | awk '{print $1}'", shell=True)
+        width, height = map(int, output.decode().strip().split('x'))
+        return width, height
+
+    else:
+        raise NotImplementedError("Unsupported OS")
 def get_screen_x():
-    return 1920
+    return get_raw_screen_resolution()[0]
 def get_screen_y():
-    return 1080
+    return get_raw_screen_resolution()[1]
 def get_cpu_usage():
     return psutil.cpu_percent(interval=1)
 def is_jpg_poll_stream(url):
