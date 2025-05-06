@@ -3,3 +3,6 @@ numpy
 requests
 psutil
 pyautogui
+ctypes
+subprocess
+platform
