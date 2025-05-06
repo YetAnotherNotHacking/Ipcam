@@ -16,9 +16,13 @@ logging.basicConfig(level=logging.DEBUG)
 # If the camera needs special inputs, define it's endpoint here and supply the content including and following the '?'
 default_stream_params = {
     "nphMotionJpeg": "?Resolution=640x480&Quality=Standard",
-    "faststream.jpg": "?stream=full&fps=16",
+    "faststream.jpg": "?stream=half&fps=16",
     "SnapshotJPEG": "?Resolution=640x480&amp;Quality=Clarity&amp;1746245729",
-    "cgi-bin/camera": "?resolution=640&amp;quality=1&amp;Language=0"
+    "cgi-bin/camera": "?resolution=640&amp;quality=1&amp;Language=0",
+    "GetLiveImage": "?connection_id=e0e2-4978d822",
+    "GetOneShot": "?image_size=640x480&frame_count=1000000000",
+    "webcapture.jpg": "?command=snap&channel=1",
+    "snap.jpg": "?JpegSize=M&JpegCam=1"
 }
 
 # Timing
@@ -163,7 +167,7 @@ def layout_frames(frames_dict, borders_dict, labels_dict):
             label = labels_dict.get(url, url)
             cv2.rectangle(frame, (0, 0), (cell_w, 25), (0, 0, 0), -1)
             cv2.putText(frame, label, (5, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
-            cv2.rectangle(frame, (0, resized_height-25), (200, resized_height), (0, 0, 0), -1)
+            cv2.rectangle(frame, (0, resized_height-25), (125, resized_height), (0, 0, 0), -1)
             cv2.putText(frame, resolution_text, (5, resized_height-7), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
             bordered = cv2.copyMakeBorder(frame, 3, 3, 3, 3, cv2.BORDER_CONSTANT, value=borders_dict.get(url, (0, 255, 0)))
             row_imgs.append(bordered)
@@ -172,13 +176,13 @@ def layout_frames(frames_dict, borders_dict, labels_dict):
     full_grid = np.vstack(grid_rows)
     full_grid = cv2.copyMakeBorder(full_grid, 40, 40, 40, 40, cv2.BORDER_CONSTANT, value=(100, 100, 100))
     uptime = time.time() - start_time
-    current_process_memory_usage = f"{psutil.Process().memory_info().rss / 1024 ** 2:.0f}MB / {psutil.virtual_memory().total / 1024 ** 2:.0f}MB"
+    current_process_memory_usage = f"Program using {psutil.Process().memory_info().rss / 1024 ** 2:.0f}MB / {psutil.virtual_memory().total / 1024 ** 2:.0f}MB"
     uptime_str = f"Uptime: {int(uptime // 60)} minutes and {int(uptime % 60)} seconds"
     camera_count = f"Connected Cameras: {len(frames_dict)}"
     displayed_cpu_usage = f"Host CPU: {get_cpu_usage()}"
     cv2.putText(full_grid, camera_count, (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-    cv2.putText(full_grid, uptime_str, (460, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-    cv2.putText(full_grid, displayed_cpu_usage, (950, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    cv2.putText(full_grid, uptime_str, (350, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    cv2.putText(full_grid, displayed_cpu_usage, (775, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
     cv2.putText(full_grid, current_process_memory_usage, (1240, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
     final_full_grid = add_logo(full_grid)
     return final_full_grid
